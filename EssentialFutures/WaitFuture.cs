@@ -36,7 +36,7 @@ namespace OEPFrameworkV3.EssentialFutures
         {
             if (paused) return;
             
-            _eta += LTime.deltaTime;
+            _eta += LoopManager.CurrentLoopTime.deltaTime;
             
             if (_eta >= _time)
             {

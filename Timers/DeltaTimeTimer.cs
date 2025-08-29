@@ -23,7 +23,7 @@ namespace OEPFrameworkV3.Timers
                 return;
             }
             
-            _eta += LTime.deltaTime;
+            _eta += LoopManager.CurrentLoopTime.deltaTime;
 
             if (_eta >= period && _skipOneFrame)
             {

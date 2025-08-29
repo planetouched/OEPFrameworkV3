@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace OEPFrameworkV3.Core
 {
@@ -8,14 +7,14 @@ namespace OEPFrameworkV3.Core
     {
         private static readonly List<Loop> _loops = new();
         public static int CurrentLoop { get; private set; }
-        public static LoopTime CurrentLoopTime { get; private set; }
+        public static LoopTime CurrentLoopTime { get; set; } = new();
         public static uint CurrentFrame { get; private set; }
 
         public static void IncrementFrame()
         {
             CurrentFrame++;
         }
-        
+
         public static int AddNewLoop()
         {
             _loops.Add(new Loop(_loops.Count));
@@ -26,7 +25,7 @@ namespace OEPFrameworkV3.Core
         {
             return _loops[loop].TimeScale;
         }
-        
+
         public static void SetTimeScale(int loop, float timeScale)
         {
             if (timeScale < 0)
@@ -56,7 +55,7 @@ namespace OEPFrameworkV3.Core
         {
             _loops[loop].Clear();
         }
-        
+
         public static void ClearAll()
         {
             foreach (var loop in _loops)
@@ -69,12 +68,7 @@ namespace OEPFrameworkV3.Core
         {
             CurrentLoop = loop;
             var timeScale = _loops[loop].TimeScale;
-            
-            CurrentLoopTime = new LoopTime
-            {
-                deltaTime = Time.deltaTime * timeScale,
-                fixedDeltaTime = Time.fixedDeltaTime * timeScale,
-            };
+            CurrentLoopTime.Setup(timeScale);
 
             _loops[loop].Call();
         }
