@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using OEPFrameworkV3.Core;
 
-namespace OEPFrameworkV3.Core
+namespace OEPFrameworkV3.Utils
 {
     public class AttachWatcher
     {

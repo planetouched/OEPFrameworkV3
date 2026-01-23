@@ -56,7 +56,7 @@ namespace OEPFrameworkV3.Core
             _loops[loop].Clear();
         }
 
-        public static void ClearAll()
+        public static void ClearAll(bool force = false)
         {
             foreach (var loop in _loops)
             {

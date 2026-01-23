@@ -101,17 +101,12 @@ namespace OEPFrameworkV3.Core
                     }
                 }
             }
-
-            if (_clearFlag)
-            {
-                _clearFlag = false;
-                InnerClear();
-            }
         }
 
         public void Clear()
         {
             _clearFlag = true;
+            InnerClear();
         }
 
         private void InnerClear()
@@ -195,7 +190,7 @@ namespace OEPFrameworkV3.Core
             {
                 if (_clearFlag)
                 {
-                    return;
+                    break;
                 }
 
                 action();
@@ -204,12 +199,6 @@ namespace OEPFrameworkV3.Core
 
         public void Call()
         {
-            if (_clearFlag)
-            {
-                _clearFlag = false;
-                InnerClear();
-            }
-
             ProcessSync();
 
             //что-то могло быть добавлено в других циклах
@@ -219,6 +208,8 @@ namespace OEPFrameworkV3.Core
                 _attachIndexes.AddRange(newAttachIndexes);
             }
 
+            _clearFlag = false;
+            
             InnerCall(_loopHandlers);
 
             //что-то добавилось в этом цикле?
@@ -232,6 +223,8 @@ namespace OEPFrameworkV3.Core
                     InnerCall(newLoopActions);
                 }
             }
+            
+            _clearFlag = false;
         }
     }
 }

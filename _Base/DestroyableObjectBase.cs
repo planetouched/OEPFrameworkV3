@@ -1,8 +1,7 @@
 ﻿using System;
 using FuturesV2.Utils.ThreadSafe;
-#if REFVIEW
+using OEPFrameworkV3.Utils;
 using RefViewer.Runtime;
-#endif
 
 namespace OEPFrameworkV3._Base
 {
@@ -12,12 +11,12 @@ namespace OEPFrameworkV3._Base
 #endif         
         IDestroyableObject
     {
-        private DestroyableWatcher _timers;
+        private DestroyableWatcher _destroyableWatcher;
         private FutureWatcher _futureWatcher;
         
         public DestroyableWatcher GetDestroyableWatcher()
         {
-            return _timers ??= new DestroyableWatcher();
+            return _destroyableWatcher ??= new DestroyableWatcher();
         }
 
         public FutureWatcher GetFutureWatcher()
@@ -39,7 +38,7 @@ namespace OEPFrameworkV3._Base
                 return;
             }
 
-            _timers?.DestroyAll();
+            _destroyableWatcher?.DestroyAll();
             _futureWatcher?.CancelFutures();
             
             OnDestroy();

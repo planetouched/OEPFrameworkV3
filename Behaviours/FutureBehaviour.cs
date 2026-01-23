@@ -1,6 +1,6 @@
 ﻿using System;
 using FuturesV2.NotThreadSafe;
-using OEPFrameworkV3.Core;
+using OEPFrameworkV3.Utils;
 
 namespace OEPFrameworkV3.Behaviours
 {
