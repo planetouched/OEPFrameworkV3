@@ -64,6 +64,11 @@ namespace OEPFrameworkV3.Core
             }
         }
 
+        public static void EnableLoop(int loop, bool enable)
+        {
+            _loops[loop].Enabled = enable;
+        }
+
         public static void Call(int loop)
         {
             CurrentLoop = loop;

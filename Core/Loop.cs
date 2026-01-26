@@ -24,6 +24,7 @@ namespace OEPFrameworkV3.Core
 
         private readonly object _syncRoot = new();
         public float TimeScale { get; set; } = 1;
+        public bool Enabled { get; set; } = true;
 
         private readonly int _loopIdx;
         
@@ -199,6 +200,8 @@ namespace OEPFrameworkV3.Core
 
         public void Call()
         {
+            if (!Enabled) return;
+            
             ProcessSync();
 
             //что-то могло быть добавлено в других циклах
