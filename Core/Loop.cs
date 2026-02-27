@@ -7,14 +7,34 @@ namespace OEPFrameworkV3.Core
     {
         private struct AttachRequest
         {
-            public Action action;
-            public int attachIdx;
+            public readonly Action action;
+            public readonly int attachIdx;
+            public readonly ITouchObject touchObject;
+
+            public AttachRequest(Action action, int attachIdx, ITouchObject touchObject)
+            {
+                this.action = action;
+                this.attachIdx = attachIdx;
+                this.touchObject = touchObject;
+            }
+        }
+        
+        private struct LoopInfo
+        {
+            public readonly Action action;
+            public readonly int attachIdx;
+            public readonly ITouchObject touchObject;
+
+            public LoopInfo(AttachRequest ar)
+            {
+                action = ar.action;
+                attachIdx = ar.attachIdx;
+                touchObject = ar.touchObject;
+            }
         }
 
         private readonly List<Action> _syncActions = new();
-        private readonly List<Action> _loopHandlers = new(1024);
-        private readonly List<int> _attachIndexes = new(1024);
-
+        private readonly List<LoopInfo> _loops = new(1024);
         private readonly List<AttachRequest> _attachRequests = new(64);
         private readonly List<AttachInfo> _detachRequests = new(64);
 
@@ -43,13 +63,9 @@ namespace OEPFrameworkV3.Core
             _syncActionAdded = true;
         }
 
-        public AttachInfo Attach(Action action)
+        public AttachInfo Attach(Action action, ITouchObject touchObject)
         {
-            var ar = new AttachRequest
-            {
-                action = action,
-                attachIdx = _attachIdx
-            };
+            var ar = new AttachRequest(action, _attachIdx, touchObject);
 
             var ai = new AttachInfo
             {
@@ -73,9 +89,9 @@ namespace OEPFrameworkV3.Core
             _detachRequests.Add(attachInfo);
         }
 
-        private void InnerCall(List<Action> actions)
+        private void InnerCall(List<LoopInfo> actions)
         {
-            foreach (var action in actions)
+            foreach (var loopInfo in actions)
             {
                 bool call = true;
 
@@ -84,7 +100,7 @@ namespace OEPFrameworkV3.Core
                 {
                     foreach (var ai in _detachRequests)
                     {
-                        if (ai.action == action)
+                        if (ai.action == loopInfo.action)
                         {
                             call = false;
                             break;
@@ -94,7 +110,30 @@ namespace OEPFrameworkV3.Core
 
                 if (call)
                 {
-                    action.Invoke();
+                    if (loopInfo.touchObject != null)
+                    {
+                        if (!loopInfo.touchObject.IsAlive)
+                        {
+                            var detach = new AttachInfo
+                            {
+                                loopIdx = _loopIdx,
+                                action = loopInfo.action,
+                                attachIdx = loopInfo.attachIdx
+                            };
+                            
+                            Detach(detach);
+                            continue;
+                        }
+
+                        if (loopInfo.touchObject.IsActive)
+                        {
+                            loopInfo.action.Invoke();
+                        }
+                    }
+                    else
+                    {
+                        loopInfo.action.Invoke();
+                    }
 
                     if (_clearFlag)
                     {
@@ -112,8 +151,7 @@ namespace OEPFrameworkV3.Core
 
         private void InnerClear()
         {
-            _loopHandlers.Clear();
-            _attachIndexes.Clear();
+            _loops.Clear();
             _attachRequests.Clear();
             _detachRequests.Clear();
 
@@ -123,20 +161,44 @@ namespace OEPFrameworkV3.Core
             }
         }
 
-        private bool ModifyLoops(out List<Action> newActions, out List<int> newAttachIndexes)
+        private int BinarySearch(List<LoopInfo> loops, int findValue)
         {
-            newActions = null;
-            newAttachIndexes = null;
+            int left = 0;
+            int right = loops.Count - 1;
+
+            while (left <= right)
+            {
+                int mid = left + (right - left) / 2;
+                int current = loops[mid].attachIdx;
+
+                if (current == findValue)
+                {
+                    return mid;
+                }
+
+                if (current < findValue)
+                {
+                    left = mid + 1;
+                }
+                else
+                {
+                    right = mid - 1;
+                }
+            }
+
+            return -1;
+        } 
+
+        private bool ModifyLoops(out List<LoopInfo> newLoops)
+        {
+            newLoops = null;
 
             if (_attachRequests.Count > 0)
             {
-                newActions = new List<Action>();
-                newAttachIndexes = new List<int>();
-
+                newLoops = new List<LoopInfo>();
                 foreach (var ar in _attachRequests)
                 {
-                    newActions.Add(ar.action);
-                    newAttachIndexes.Add(ar.attachIdx);
+                    newLoops.Add(new LoopInfo(ar));
                 }
 
                 _attachRequests.Clear();
@@ -144,31 +206,29 @@ namespace OEPFrameworkV3.Core
 
             if (_detachRequests.Count > 0)
             {
-                foreach (var attachInfo in _detachRequests)
+                foreach (var detachInfo in _detachRequests)
                 {
-                    if (newActions != null)
+                    if (newLoops != null)
                     {
-                        var newRealIdx = newAttachIndexes.BinarySearch(attachInfo.attachIdx);
+                        var newRealIdx = BinarySearch(newLoops, detachInfo.attachIdx);
                         if (newRealIdx >= 0)
                         {
-                            newActions.RemoveAt(newRealIdx);
-                            newAttachIndexes.RemoveAt(newRealIdx);
+                            newLoops.RemoveAt(newRealIdx);
                             continue;
                         }
                     }
 
-                    var realIdx = _attachIndexes.BinarySearch(attachInfo.attachIdx);
+                    var realIdx = BinarySearch(_loops, detachInfo.attachIdx);
                     if (realIdx >= 0)
                     {
-                        _loopHandlers.RemoveAt(realIdx);
-                        _attachIndexes.RemoveAt(realIdx);
+                        _loops.RemoveAt(realIdx);
                     }
                 }
 
                 _detachRequests.Clear();
             }
 
-            return newActions != null;
+            return newLoops != null;
         }
 
         private void ProcessSync()
@@ -205,23 +265,21 @@ namespace OEPFrameworkV3.Core
             ProcessSync();
 
             //что-то могло быть добавлено в других циклах
-            if (ModifyLoops(out var newActions, out var newAttachIndexes))
+            if (ModifyLoops(out var newLoops))
             {
-                _loopHandlers.AddRange(newActions);
-                _attachIndexes.AddRange(newAttachIndexes);
+                _loops.AddRange(newLoops);
             }
 
             _clearFlag = false;
             
-            InnerCall(_loopHandlers);
+            InnerCall(_loops);
 
             //что-то добавилось в этом цикле?
             while (_attachRequests.Count > 0)
             {
-                if (ModifyLoops(out var newLoopActions, out var newLoopAttachIndexes))
+                if (ModifyLoops(out var newLoopActions))
                 {
-                    _loopHandlers.AddRange(newLoopActions);
-                    _attachIndexes.AddRange(newLoopAttachIndexes);
+                    _loops.AddRange(newLoopActions);
                     //вызываем только новые
                     InnerCall(newLoopActions);
                 }

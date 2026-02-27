@@ -5,28 +5,28 @@ namespace OEPFrameworkV3.Utils
 {
     public class DestroyableWatcher
     {
-        private readonly List<IDestroyableObject> _droppableObjects = new();
+        private readonly List<IDestroyableObject> _objects = new();
 
         public void Add(IDestroyableObject destroyable)
         {
-            _droppableObjects.Add(destroyable);
+            _objects.Add(destroyable);
             destroyable.Destroyed += OnDestroy;
         }
 
         private void OnDestroy(IDestroyableObject destroyableObject)
         {
-            _droppableObjects.Remove(destroyableObject);
+            _objects.Remove(destroyableObject);
         }
 
         public void DestroyAll()
         {
-            foreach (var droppableObject in _droppableObjects)
+            foreach (var droppableObject in _objects)
             {
                 droppableObject.Destroyed -= OnDestroy;
                 droppableObject.Destroy();
             }
             
-            _droppableObjects.Clear();
+            _objects.Clear();
         }
     }
 }

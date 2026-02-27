@@ -2,24 +2,15 @@
 using FuturesV2.NotThreadSafe;
 using OEPFrameworkV3.Utils;
 
-namespace OEPFrameworkV3.Behaviours
+namespace OEPFrameworkV3.FutureLayer
 {
     public abstract class FutureBehaviour : Future
     {
         private readonly AttachWatcher _watcher = new();
-        protected bool paused;
 
         protected FutureBehaviour()
         {
             AddListenerOnFinalize(_ => { Drop(); });
-        }
-
-        protected virtual void OnPause()
-        {
-        }
-
-        protected virtual void OnPlay()
-        {
         }
 
         protected void Attach(int loop, Action action)
@@ -30,24 +21,6 @@ namespace OEPFrameworkV3.Behaviours
         protected void Detach()
         {
             _watcher.DetachAll();
-        }
-
-        public void Pause()
-        {
-            if (!paused)
-            {
-                paused = true;
-                OnPause();
-            }
-        }
-
-        public void Play()
-        {
-            if (paused)
-            {
-                paused = false;
-                OnPlay();
-            }
         }
 
         public override void ReUse()

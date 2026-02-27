@@ -41,9 +41,9 @@ namespace OEPFrameworkV3.Core
             _loops[loop].SyncAction(action);
         }
 
-        public static AttachInfo Attach(int loop, Action action)
+        public static AttachInfo Attach(int loop, Action action, ITouchObject touchObject = null)
         {
-            return _loops[loop].Attach(action);
+            return _loops[loop].Attach(action, touchObject);
         }
 
         public static void Detach(AttachInfo attachInfo)
@@ -56,7 +56,7 @@ namespace OEPFrameworkV3.Core
             _loops[loop].Clear();
         }
 
-        public static void ClearAll(bool force = false)
+        public static void ClearAll()
         {
             foreach (var loop in _loops)
             {

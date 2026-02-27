@@ -8,6 +8,6 @@ namespace OEPFrameworkV3.Timers._Base
         void Reset();
         void Resume();
         void Pause();
-        void Bind(IDestroyableObject binder);
+        ITimer BindTo(IDestroyableObject obj);
     }
 }

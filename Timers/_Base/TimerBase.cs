@@ -1,10 +1,9 @@
 ﻿using System;
 using OEPFrameworkV3._Base;
-using OEPFrameworkV3.Behaviours;
 
 namespace OEPFrameworkV3.Timers._Base
 {
-    public abstract class TimerBase : LoopBehaviour, ITimer
+    public abstract class TimerBase : LoopObjectBase, ITimer
     {
         private Action<ITimer> _action;
         public object Obj { get; set; }
@@ -48,9 +47,10 @@ namespace OEPFrameworkV3.Timers._Base
             base.OnDestroy();
         }
         
-        public void Bind(IDestroyableObject binder)
+        public ITimer BindTo(IDestroyableObject obj)
         {
-            binder.GetDestroyableWatcher().Add(this);
+            obj.Bind(this);
+            return this;
         }
     }
 }

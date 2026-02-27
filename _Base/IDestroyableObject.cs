@@ -1,13 +1,12 @@
 ﻿using System;
-using FuturesV2.Utils.ThreadSafe;
-using OEPFrameworkV3.Utils;
+using FuturesV2._Base;
 
 namespace OEPFrameworkV3._Base
 {
     public interface IDestroyableObject
     {
-        DestroyableWatcher GetDestroyableWatcher();
-        FutureWatcher GetFutureWatcher();
+        void Bind(IFuture future);
+        void Bind(IDestroyableObject obj);
         bool Alive { get; }
         event Action<IDestroyableObject> Destroyed;
         void Destroy();
