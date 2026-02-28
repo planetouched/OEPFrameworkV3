@@ -108,37 +108,36 @@ namespace OEPFrameworkV3.Core
                     }
                 }
 
-                if (call)
+                if (!call) continue;
+                
+                if (loopInfo.touchObject != null)
                 {
-                    if (loopInfo.touchObject != null)
+                    if (!loopInfo.touchObject.IsAlive)
                     {
-                        if (!loopInfo.touchObject.IsAlive)
+                        var detach = new AttachInfo
                         {
-                            var detach = new AttachInfo
-                            {
-                                loopIdx = _loopIdx,
-                                action = loopInfo.action,
-                                attachIdx = loopInfo.attachIdx
-                            };
+                            loopIdx = _loopIdx,
+                            action = loopInfo.action,
+                            attachIdx = loopInfo.attachIdx
+                        };
                             
-                            Detach(detach);
-                            continue;
-                        }
-
-                        if (loopInfo.touchObject.IsActive)
-                        {
-                            loopInfo.action.Invoke();
-                        }
+                        Detach(detach);
+                        continue;
                     }
-                    else
+
+                    if (loopInfo.touchObject.IsActive)
                     {
                         loopInfo.action.Invoke();
                     }
+                }
+                else
+                {
+                    loopInfo.action.Invoke();
+                }
 
-                    if (_clearFlag)
-                    {
-                        break;
-                    }
+                if (_clearFlag)
+                {
+                    break;
                 }
             }
         }
