@@ -110,19 +110,27 @@ namespace OEPFrameworkV3.Core
 
                 if (!call) continue;
                 
-                if (loopInfo.touchObject != null && !loopInfo.touchObject.IsActive)
+                if (loopInfo.touchObject != null)
                 {
-                    var detach = new AttachInfo
+                    if (!loopInfo.touchObject.IsAlive)
                     {
-                        loopIdx = _loopIdx,
-                        action = loopInfo.action,
-                        attachIdx = loopInfo.attachIdx
-                    };
+                        var detach = new AttachInfo
+                        {
+                            loopIdx = _loopIdx,
+                            action = loopInfo.action,
+                            attachIdx = loopInfo.attachIdx
+                        };
                             
-                    Detach(detach);
-                    continue;
+                        Detach(detach);
+                        continue;
+                    }
+                    
+                    if (!loopInfo.touchObject.IsActive)
+                    {
+                        continue;
+                    }
                 }
-                
+
                 loopInfo.action.Invoke();
 
                 if (_clearFlag)
