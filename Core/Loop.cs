@@ -112,7 +112,11 @@ namespace OEPFrameworkV3.Core
                 
                 if (loopInfo.touchObject != null)
                 {
-                    if (!loopInfo.touchObject.IsAlive)
+                    if (loopInfo.touchObject.IsActive)
+                    {
+                        loopInfo.action.Invoke();
+                    }
+                    else 
                     {
                         var detach = new AttachInfo
                         {
@@ -123,11 +127,6 @@ namespace OEPFrameworkV3.Core
                             
                         Detach(detach);
                         continue;
-                    }
-
-                    if (loopInfo.touchObject.IsActive)
-                    {
-                        loopInfo.action.Invoke();
                     }
                 }
                 else
