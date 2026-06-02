@@ -10,7 +10,7 @@
         {
             DeltaTime = UnityEngine.Time.deltaTime * loopTimeScale;
             FixedDeltaTime = UnityEngine.Time.fixedDeltaTime;
-            Time = UnityEngine.Time.fixedDeltaTime;
+            Time = UnityEngine.Time.time;
         }
 
         public static void SetLoopTime<T>() where T : LoopTime, new()
