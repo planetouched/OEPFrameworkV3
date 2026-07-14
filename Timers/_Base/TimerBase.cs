@@ -46,11 +46,5 @@ namespace OEPFrameworkV3.Timers._Base
             _action = null;
             base.OnDestroy();
         }
-        
-        public ITimer BindTo(IDestroyableObject obj)
-        {
-            obj.Bind(this);
-            return this;
-        }
     }
 }
