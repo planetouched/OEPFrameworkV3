@@ -33,7 +33,7 @@ namespace OEPFrameworkV3.MonoLayer
         
         #endregion Static
 
-        public override bool IsActive => isActiveAndEnabled && IsReady;
+        public override bool IsActive => IsReady && isActiveAndEnabled;
         public bool IsReady { get; private set; }
 
         private void Awake()
