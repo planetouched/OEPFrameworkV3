@@ -1,4 +1,5 @@
-﻿using FuturesV2._Base;
+﻿#if !DISABLE_FUTURES 
+using FuturesV2._Base;
 using OEPFrameworkV3._Base;
 
 namespace OEPFrameworkV3.FutureLayer
@@ -12,3 +13,4 @@ namespace OEPFrameworkV3.FutureLayer
         }
     }
 }
+#endif

@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !DISABLE_FUTURES
 using FuturesV2._Base;
 using FuturesV2.Utils.ThreadSafe;
+#endif
 using OEPFrameworkV3.Core;
 using OEPFrameworkV3.Utils;
+#if REFVIEW
 using RefViewer.Runtime;
+#endif
 
 namespace OEPFrameworkV3._Base
 {
@@ -15,15 +19,18 @@ namespace OEPFrameworkV3._Base
         IDestroyableObject
     {
         private DestroyableWatcher _destroyableWatcher;
+#if !DISABLE_FUTURES
         private FutureWatcher _futureWatcher;
+#endif
         private List<AttachInfo> _attachInfos;
 
-        public bool Alive { get; private set; } = true;
+        public bool IsAlive { get; private set; } = true;
         public event Action<IDestroyableObject> Destroyed;
 
+#if !DISABLE_FUTURES        
         public void Bind(IFuture future)
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 throw new Exception("Object is not alive");
             }
@@ -31,10 +38,11 @@ namespace OEPFrameworkV3._Base
             _futureWatcher ??= new FutureWatcher();
             _futureWatcher.AddFuture(future);
         }
+#endif        
 
         public void Bind(IDestroyableObject obj)
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 throw new Exception("Object is not alive");
             }
@@ -45,7 +53,7 @@ namespace OEPFrameworkV3._Base
         
         protected void Attach(int loop, Action action)
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 throw new Exception("Object is not alive");
             }
@@ -56,7 +64,7 @@ namespace OEPFrameworkV3._Base
 
         protected void Detach(int loop)
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 throw new Exception("Object is not alive");
             }
@@ -75,7 +83,7 @@ namespace OEPFrameworkV3._Base
 
         protected void DetachAll()
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 throw new Exception("Object is not alive");
             }
@@ -96,24 +104,27 @@ namespace OEPFrameworkV3._Base
         
         public void Destroy()
         {
-            if (!Alive)
+            if (!IsAlive)
             {
                 return;
             }
 
             DetachAll();
             _destroyableWatcher?.DestroyAll();
+            
+#if !DISABLE_FUTURES
             _futureWatcher?.CancelFutures();
+#endif
             
             OnDestroy();
-            Alive = false;
+            IsAlive = false;
             Destroyed?.Invoke(this);
             Destroyed = null;
         }
 
         public virtual void SetAlive()
         {
-            Alive = true;
+            IsAlive = true;
         }
     }
 }

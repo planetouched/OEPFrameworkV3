@@ -5,17 +5,32 @@ using UnityEngine;
 
 namespace OEPFrameworkV3.MonoLayer
 {
-    public class MonoEx : MonoBehaviour, ITouchObject
+    public abstract class MonoEx : MonoBehaviour, ITouchObject
     {
         private List<AttachInfo> _attachInfos;
 
-        public virtual bool IsActive => isActiveAndEnabled;
+        public bool IsActive { get; private set; }
         public bool IsAlive => this;
 
         protected void Attach(int loop, Action action)
         {
             _attachInfos ??= new();
             _attachInfos.Add(LoopManager.Attach(loop, action, this));
+        }
+
+        protected abstract void OnEnableEx();
+        protected abstract void OnDisableEx();
+        
+        private void OnEnable()
+        {
+            IsActive = true;
+            OnEnableEx();
+        }
+
+        private void OnDisable()
+        {
+            IsActive = false;
+            OnDisableEx();
         }
 
         protected void Detach(int loop)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !DISABLE_FUTURES
+using System;
 using FuturesV2.NotThreadSafe;
 using OEPFrameworkV3.Utils;
 
@@ -35,3 +36,4 @@ namespace OEPFrameworkV3.FutureLayer
         }
     }
 }
+#endif
